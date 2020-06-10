@@ -1,12 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  Button,
-  Alert,
-  ScrollView,
-} from "react-native";
+import { View, Text, StyleSheet, Button, Alert, FlatList } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
 import NumberContainer from "../components/NumberContainer";
@@ -24,10 +17,18 @@ const generateRandomBetween = (min, max, exclude) => {
   }
 };
 
+const renderListItem = (listLength, itemData) => (
+  
+  <View style={styles.listItem}>
+    <Text>#{listLength - itemData.index}</Text>
+    <Text>{itemData.item}</Text>
+  </View>
+);
+
 const GameScreen = (props) => {
   const initialGuess = generateRandomBetween(1, 100, props.userChoice);
   const [currentGuess, setCurrentGuess] = useState(initialGuess);
-  const [pastGuesses, setPastGuesses] = useState([initialGuess]);
+  const [pastGuesses, setPastGuesses] = useState([initialGuess.toString()]);
 
   const currentLow = useRef(1);
   const currentHigh = useRef(100);
@@ -65,7 +66,10 @@ const GameScreen = (props) => {
     );
     setCurrentGuess(nextNumber);
 
-    setPastGuesses((currentPastGuesses) => [nextNumber, ...currentPastGuesses]);
+    setPastGuesses((currentPastGuesses) => [
+      nextNumber.toString(),
+      ...currentPastGuesses,
+    ]);
   };
 
   return (
@@ -80,13 +84,14 @@ const GameScreen = (props) => {
           <Ionicons name="md-add" size={24} color="white" />
         </MainButton>
       </Card>
-      <ScrollView>
-        {pastGuesses.map((guess) => (
-          <View key={guess}>
-            <Text>{guess}</Text>
-          </View>
-        ))}
-      </ScrollView>
+      <View style={styles.listContainer}>
+      <FlatList
+          keyExtractor={item => item}
+          data={pastGuesses}
+          renderItem={renderListItem.bind(this, pastGuesses.length)}
+          contentContainerStyle={styles.list}
+        />
+      </View>
     </View>
   );
 };
@@ -103,6 +108,25 @@ const styles = StyleSheet.create({
     marginTop: 20,
     width: 400,
     maxWidth: "90%",
+  },
+  listContainer: {
+    flex: 1,
+    width: "60%",
+  },
+  list: {
+    flexGrow: 1,
+    justifyContent: "flex-end",
+    // alignItems: "center",
+  },
+  listItem: {
+    borderColor: "#ccc",
+    borderWidth: 1,
+    padding: 15,
+    marginVertical: 10,
+    backgroundColor: "#fff",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
   },
 });
 
